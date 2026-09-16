@@ -1,0 +1,27 @@
+import { defineConfig, devices } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: true,
+  retries: 0,
+  reporter: 'list',
+  use: {
+    baseURL: 'http://localhost:4173',
+    trace: 'on-first-retry',
+    // This repo's pinned @playwright/test version expects a browser revision
+    // newer than what's pre-installed in this environment. Point at the
+    // pre-installed Chromium instead of downloading a matching one.
+    launchOptions: process.env.PLAYWRIGHT_CHROMIUM_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+      : undefined,
+  },
+  webServer: {
+    command: 'npm run build && npm run preview -- --port 4173 --strictPort',
+    url: 'http://localhost:4173',
+    reuseExistingServer: !process.env.CI,
+    timeout: 60_000,
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+  ],
+})

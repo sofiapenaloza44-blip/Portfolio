@@ -20,6 +20,25 @@ npm run build    # type-check + production build to dist/
 npm run preview  # preview the production build
 ```
 
+## End-to-end tests
+
+[Playwright](https://playwright.dev) drives the built site in a real browser (home page content,
+navigating into a case study, the career journey page).
+
+```bash
+npx playwright install   # first time only, downloads a matching browser
+npm run test:e2e         # headless run (builds, serves, and tests)
+npm run test:e2e:ui      # interactive UI mode
+```
+
+The suite builds the site and serves it with `vite preview` automatically (see
+`playwright.config.ts`), so there's no separate server to start first.
+
+If you're running in an environment with a pre-installed Chromium that doesn't match this
+project's pinned Playwright version (so `npx playwright install` isn't an option), set
+`PLAYWRIGHT_CHROMIUM_PATH` to that browser's executable and the config will use it instead of
+downloading one.
+
 ## Content
 
 - `src/data/work.ts` — case studies grouped by industry. The `overview` field for each is
