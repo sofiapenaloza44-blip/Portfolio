@@ -39,6 +39,22 @@ project's pinned Playwright version (so `npx playwright install` isn't an option
 `PLAYWRIGHT_CHROMIUM_PATH` to that browser's executable and the config will use it instead of
 downloading one.
 
+### Running against the live site
+
+To run the same suite against the deployed GitHub Pages site instead of a local build, set
+`PLAYWRIGHT_BASE_URL` — this also skips building/serving a local copy:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://sofiapenaloza44-blip.github.io/Portfolio/ npm run test:e2e
+```
+
+Or point the CLI's own tools (codegen, the inspector) at the live site directly, no config needed:
+
+```bash
+npx playwright codegen https://sofiapenaloza44-blip.github.io/Portfolio/
+npx playwright open https://sofiapenaloza44-blip.github.io/Portfolio/
+```
+
 ## Content
 
 - `src/data/work.ts` — case studies grouped by industry. The `overview` field for each is
