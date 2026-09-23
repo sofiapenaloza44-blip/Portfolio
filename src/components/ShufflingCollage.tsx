@@ -1,40 +1,60 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion, LayoutGroup } from 'motion/react'
 import { allCaseStudies } from '../data/work'
 
-// Slot layout: a 3x3 grid of overlapping, slightly rotated tiles, sized so
-// adjacent columns/rows overlap by about 7% (col/row start at 0/31/62%,
-// each tile is 38% wide/tall). Rotation and z-index vary per slot so the
-// cluster reads as a loose stack of cards rather than a rigid grid.
-const ROTATIONS = [-4, 5, -3, 4, -5, 3, -6, 6, -2]
-
-const SLOTS = Array.from({ length: 9 }, (_, i) => ({
-  top: `${Math.floor(i / 3) * 31}%`,
-  left: `${(i % 3) * 31}%`,
-  width: '38%',
-  height: '38%',
-  rotate: ROTATIONS[i],
-  zIndex: i + 1,
-}))
+// Slot layout: hand-placed, varied-size tiles overlapping in a loose
+// cross/diamond cluster (not a uniform grid) — modeled on a reference
+// animation of an overlapping card collage. Percentages are of a square
+// container.
+const SLOTS = [
+  { top: '0%', left: '32%', width: '36%', height: '42%', rotate: -5 },
+  { top: '8%', left: '2%', width: '30%', height: '36%', rotate: 4 },
+  { top: '6%', left: '66%', width: '32%', height: '34%', rotate: -3 },
+  { top: '30%', left: '22%', width: '30%', height: '36%', rotate: 6 },
+  { top: '28%', left: '56%', width: '34%', height: '38%', rotate: -4 },
+  { top: '34%', left: '0%', width: '26%', height: '32%', rotate: 3 },
+  { top: '36%', left: '74%', width: '26%', height: '30%', rotate: -6 },
+  { top: '58%', left: '30%', width: '38%', height: '42%', rotate: 2 },
+  { top: '64%', left: '2%', width: '28%', height: '34%', rotate: -3 },
+].map((slot, i) => ({ ...slot, zIndex: i + 1 }))
 
 const items = allCaseStudies.slice(0, 9)
 
 export function ShufflingCollage() {
   const reduce = useReducedMotion()
   const [order, setOrder] = useState(() => items.map((_, i) => i))
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     if (reduce) return
-    const id = setInterval(() => {
-      setOrder((current) => [...current.slice(1), current[0]])
-    }, 3200)
-    return () => clearInterval(id)
+
+    // Swap just one random pair of tiles per tick, on a jittered delay,
+    // instead of moving the whole cluster on a fixed interval. That keeps
+    // one or two cards drifting at any moment while the rest hold still —
+    // continuous, asynchronous motion rather than a synchronized batch jump.
+    const scheduleNext = () => {
+      const delay = 900 + Math.random() * 900
+      timeoutRef.current = setTimeout(() => {
+        setOrder((current) => {
+          const next = [...current]
+          const a = Math.floor(Math.random() * next.length)
+          let b = Math.floor(Math.random() * next.length)
+          if (b === a) b = (b + 1) % next.length
+          ;[next[a], next[b]] = [next[b], next[a]]
+          return next
+        })
+        scheduleNext()
+      }, delay)
+    }
+
+    scheduleNext()
+    return () => clearTimeout(timeoutRef.current)
   }, [reduce])
 
   return (
     <LayoutGroup>
-      <div className="relative mx-auto aspect-square w-full max-w-md sm:max-w-lg">
+      <div className="relative mx-auto aspect-[9/10] w-full max-w-md sm:max-w-lg">
         {order.map((itemIndex, slotIndex) => {
           const item = items[itemIndex]
           const slot = SLOTS[slotIndex]
@@ -42,7 +62,7 @@ export function ShufflingCollage() {
             <motion.div
               key={item.slug}
               layout
-              transition={reduce ? { duration: 0 } : { duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              transition={reduce ? { duration: 0 } : { duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               className="absolute"
               style={{ top: slot.top, left: slot.left, width: slot.width, height: slot.height, zIndex: slot.zIndex }}
             >
