@@ -4,6 +4,7 @@ import { Learnings } from '../components/Learnings'
 import { CaseStudyCard } from '../components/CaseStudyCard'
 import { IndustryIcon } from '../components/IndustryIcon'
 import { RevealSection } from '../components/RevealSection'
+import { ShufflingCollage } from '../components/ShufflingCollage'
 import { industries } from '../data/work'
 
 const [finance, edtech, designValue, aerospace, electronics] = industries
@@ -24,9 +25,20 @@ export function Home() {
       <Philosophy />
 
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Featured work</h2>
+        <div className="grid grid-cols-1 items-center gap-10 sm:grid-cols-2 sm:gap-16">
+          <RevealSection>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Featured work</h2>
+            <p className="mt-4 max-w-sm text-ink-soft">
+              Nine projects across fintech, edtech, aerospace, and electronics. Click any of them to
+              jump straight to the case study.
+            </p>
+          </RevealSection>
+          <RevealSection delay={0.1}>
+            <ShufflingCollage />
+          </RevealSection>
+        </div>
 
-        <div className="mt-12">
+        <div className="mt-20">
           <SectionHeading group={finance} />
           <div className="grid grid-cols-1 gap-6 md:grid-cols-[2fr_1fr]">
             <RevealSection>
