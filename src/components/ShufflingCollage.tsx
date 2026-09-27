@@ -6,56 +6,71 @@ import { allCaseStudies } from '../data/work'
 
 const items = allCaseStudies.slice(0, 9)
 
-// Each card sits at a fixed angle around an ellipse and continuously
-// orbits (constant angular speed, clockwise). Depth is quantized into 3
-// bands by the card's current vertical position on the ellipse (top arc =
-// back, middle = mid, bottom arc = front): z-index, scale, and opacity all
-// step between the 3 bands, so cards visibly pass behind and in front of
-// each other as the ring turns, like a carousel.
-const RX = 32 // ellipse horizontal radius, % of container
-const RY = 24 // ellipse vertical radius, % of container
-const TILE_W = 30 // %, uniform tile size
-const TILE_H = 34
-const REVOLUTION_SECONDS = 30
-const TILT = [-3, 2, -2, 3, -3, 2, -2, 3, -1] // small fixed per-card tilt, unrelated to orbit position
+// Measured directly off the reference screenshot (percent of a 966x972
+// container), then ordered clockwise around the cluster's centroid so
+// tiles can flow smoothly from one measured position to the next. `layer`
+// (0 back, 1 mid, 2 front) sets depth: z-index, scale, and opacity.
+const SLOTS = [
+  { left: 35.2, top: 35.2, width: 28.8, height: 28.6, layer: 1 },
+  { left: 61.3, top: 49.1, width: 24.2, height: 25.7, layer: 2 },
+  { left: 44.0, top: 68.2, width: 23.8, height: 23.9, layer: 2 },
+  { left: 18.3, top: 56.6, width: 24.1, height: 25.2, layer: 2 },
+  { left: 7.1, top: 46.8, width: 20.8, height: 18.5, layer: 1 },
+  { left: 10.9, top: 25.2, width: 28.0, height: 25.2, layer: 1 },
+  { left: 26.5, top: 9.5, width: 15.2, height: 23.5, layer: 0 },
+  { left: 40.4, top: 10.0, width: 25.4, height: 24.0, layer: 0 },
+  { left: 65.7, top: 23.9, width: 23.5, height: 23.7, layer: 0 },
+]
 
-const LAYERS = [
-  { z: 10, scale: 0.84, opacity: 0.8 }, // back
-  { z: 20, scale: 1, opacity: 0.95 }, // mid
-  { z: 30, scale: 1.14, opacity: 1 }, // front
-] as const
+const LAYER_Z = [10, 20, 30]
+const LAYER_SCALE = [0.86, 1, 1.12]
+const LAYER_OPACITY = [0.82, 0.95, 1]
+const TILT = [-3, 2, -2, 3, -3, 2, -2, 3, -1] // small fixed per-tile tilt, unrelated to path position
 
-function layerFor(sinTheta: number) {
-  if (sinTheta > 1 / 3) return 2
-  if (sinTheta < -1 / 3) return 0
-  return 1
+const REVOLUTION_SECONDS = 32
+const N = SLOTS.length
+
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t
 }
 
 export function ShufflingCollage() {
   const reduce = useReducedMotion()
   const tileRefs = useRef<(HTMLDivElement | null)[]>([])
   const hoveredRef = useRef<number | null>(null)
-  const currentAngleRef = useRef(0)
-  const placeRef = useRef<(angle: number) => void>(() => {})
+  const currentProgressRef = useRef(0)
+  const placeRef = useRef<(progress: number) => void>(() => {})
 
   useEffect(() => {
-    const baseAngles = items.map((_, i) => (i / items.length) * Math.PI * 2)
-
-    const place = (angle: number) => {
-      currentAngleRef.current = angle
+    // Each tile follows the same clockwise path around the measured
+    // slots, offset from the others by one slot, so at any instant every
+    // slot is occupied by exactly one tile while all 9 continuously flow
+    // from slot to slot (the "ring" motion) instead of jumping between
+    // fixed positions.
+    const place = (progress: number) => {
+      currentProgressRef.current = progress
       items.forEach((_, i) => {
         const el = tileRefs.current[i]
         if (!el) return
-        const theta = baseAngles[i] + angle
-        const sinT = Math.sin(theta)
-        const cosT = Math.cos(theta)
-        const layer = hoveredRef.current === i ? 2 : layerFor(sinT)
-        const { z, scale, opacity } = LAYERS[layer]
+        const phase = (progress + i) % N
+        const index = Math.floor(phase)
+        const next = (index + 1) % N
+        const frac = phase - index
+        const a = SLOTS[index]
+        const b = SLOTS[next]
+
+        const isHovered = hoveredRef.current === i
+        const scale = isHovered ? LAYER_SCALE[2] * 1.05 : lerp(LAYER_SCALE[a.layer], LAYER_SCALE[b.layer], frac)
+        const opacity = isHovered ? 1 : lerp(LAYER_OPACITY[a.layer], LAYER_OPACITY[b.layer], frac)
+        const z = isHovered ? 100 : Math.round(lerp(LAYER_Z[a.layer], LAYER_Z[b.layer], frac)) + i
+
         gsap.set(el, {
-          left: `${50 + RX * cosT}%`,
-          top: `${50 + RY * sinT}%`,
-          zIndex: hoveredRef.current === i ? 100 : z + i,
-          scale: hoveredRef.current === i ? scale * 1.05 : scale,
+          left: `${lerp(a.left, b.left, frac)}%`,
+          top: `${lerp(a.top, b.top, frac)}%`,
+          width: `${lerp(a.width, b.width, frac)}%`,
+          height: `${lerp(a.height, b.height, frac)}%`,
+          zIndex: z,
+          scale,
           opacity,
         })
       })
@@ -71,13 +86,13 @@ export function ShufflingCollage() {
       return
     }
 
-    const proxy = { angle: 0 }
+    const proxy = { progress: 0 }
     const tween = gsap.to(proxy, {
-      angle: Math.PI * 2,
+      progress: N,
       duration: REVOLUTION_SECONDS,
       ease: 'none',
       repeat: -1,
-      onUpdate: () => place(proxy.angle),
+      onUpdate: () => place(proxy.progress),
     })
 
     return () => {
@@ -94,14 +109,13 @@ export function ShufflingCollage() {
             tileRefs.current[i] = el
           }}
           className="absolute"
-          style={{ width: `${TILE_W}%`, height: `${TILE_H}%`, transform: 'translate(-50%, -50%)' }}
           onMouseEnter={() => {
             hoveredRef.current = i
-            placeRef.current(currentAngleRef.current)
+            placeRef.current(currentProgressRef.current)
           }}
           onMouseLeave={() => {
             hoveredRef.current = null
-            placeRef.current(currentAngleRef.current)
+            placeRef.current(currentProgressRef.current)
           }}
         >
           <div
