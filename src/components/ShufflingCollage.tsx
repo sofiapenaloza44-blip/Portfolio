@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, useReducedMotion, LayoutGroup } from 'motion/react'
+import { useReducedMotion } from 'motion/react'
+import { gsap } from 'gsap'
 import { allCaseStudies } from '../data/work'
 
 // Slot layout: hand-placed, varied-size tiles overlapping in a loose
 // cross/diamond cluster (not a uniform grid) — modeled on a reference
-// animation of an overlapping card collage. Percentages are of a square
+// animation of an overlapping card collage. Slots themselves never move;
+// only their rotation is fixed per slot. Percentages are of a square
 // container.
 const SLOTS = [
   { top: '0%', left: '32%', width: '36%', height: '42%', rotate: -5 },
@@ -24,81 +26,119 @@ const items = allCaseStudies.slice(0, 9)
 export function ShufflingCollage() {
   const reduce = useReducedMotion()
   const [order, setOrder] = useState(() => items.map((_, i) => i))
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const floatRefs = useRef<(HTMLDivElement | null)[]>([])
+  const contentRefs = useRef<(HTMLDivElement | null)[]>([])
+  const swapTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
+  // Continuous idle drift: every tile gently floats on its own randomized
+  // loop the whole time, so the cluster never sits perfectly still between
+  // shuffles (GSAP timeline work per Section 5's "motion must be motivated"
+  // guidance — this communicates "alive", not just decoration).
+  useEffect(() => {
+    if (reduce) return
+    const tweens = floatRefs.current.map((el, i) => {
+      if (!el) return null
+      return gsap.to(el, {
+        x: () => gsap.utils.random(-8, 8),
+        y: () => gsap.utils.random(-7, 7),
+        duration: () => gsap.utils.random(2.6, 4.2),
+        delay: i * 0.15,
+        ease: 'sine.inOut',
+        repeat: -1,
+        yoyo: true,
+        repeatRefresh: true,
+      })
+    })
+    return () => tweens.forEach((t) => t?.kill())
+  }, [reduce])
+
+  // Periodic swap: cross-fade the content of two random slots instead of
+  // physically sliding tiles across the cluster. Animating opacity/scale
+  // (not left/top) keeps this compositor-friendly, and a GSAP timeline
+  // gives precise control over the two-step "fade out, swap data, fade
+  // in" sequence that a single CSS transition can't express.
   useEffect(() => {
     if (reduce) return
 
-    // Swap just one random pair of tiles per tick, on a jittered delay,
-    // instead of moving the whole cluster on a fixed interval. That keeps
-    // one or two cards drifting at any moment while the rest hold still —
-    // continuous, asynchronous motion rather than a synchronized batch jump.
     const scheduleNext = () => {
-      const delay = 900 + Math.random() * 900
-      timeoutRef.current = setTimeout(() => {
-        setOrder((current) => {
-          const next = [...current]
-          const a = Math.floor(Math.random() * next.length)
-          let b = Math.floor(Math.random() * next.length)
-          if (b === a) b = (b + 1) % next.length
-          ;[next[a], next[b]] = [next[b], next[a]]
-          return next
+      const delay = gsap.utils.random(1100, 2000)
+      swapTimeout.current = setTimeout(() => {
+        const a = Math.floor(Math.random() * items.length)
+        let b = Math.floor(Math.random() * items.length)
+        if (b === a) b = (b + 1) % items.length
+
+        const elA = contentRefs.current[a]
+        const elB = contentRefs.current[b]
+        const tl = gsap.timeline({
+          onComplete: () => {
+            setOrder((current) => {
+              const next = [...current]
+              ;[next[a], next[b]] = [next[b], next[a]]
+              return next
+            })
+            scheduleNext()
+          },
         })
-        scheduleNext()
+        if (elA && elB) {
+          tl.to([elA, elB], { opacity: 0, scale: 0.92, duration: 0.28, ease: 'power2.in' })
+        }
       }, delay)
     }
 
     scheduleNext()
-    return () => clearTimeout(timeoutRef.current)
+    return () => clearTimeout(swapTimeout.current)
   }, [reduce])
 
+  // Once `order` updates (new content swapped in while faded out), fade
+  // the two changed slots back in. Simple approach: fade every slot's
+  // content ref up to opacity 1 on every order change — cheap no-op for
+  // slots that never left 1.
+  useEffect(() => {
+    contentRefs.current.forEach((el) => {
+      if (!el) return
+      gsap.to(el, { opacity: 1, scale: 1, duration: 0.4, ease: 'power2.out' })
+    })
+  }, [order])
+
   return (
-    <LayoutGroup>
-      <div className="relative mx-auto aspect-[9/10] w-full max-w-md sm:max-w-lg">
-        {order.map((itemIndex, slotIndex) => {
-          const item = items[itemIndex]
-          const slot = SLOTS[slotIndex]
-          return (
-            <motion.div
-              key={item.slug}
-              layout
-              transition={reduce ? { duration: 0 } : { duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute"
-              style={{ top: slot.top, left: slot.left, width: slot.width, height: slot.height, zIndex: slot.zIndex }}
-            >
-              {/* Rotation lives on a nested, non-layout-animated element:
-                  combining Motion's `layout` FLIP transform with an animated
-                  `rotate` on the same element distorts the box (its scale
-                  correction assumes an axis-aligned rect). Rotation is set
-                  via a CSS variable (not inline `transform`) so the
-                  hover:rotate-0/hover:scale-105 utilities below can still
-                  override it — an inline `transform` style would always win
-                  over a class-based one regardless of the `:hover` state. */}
+    <div className="relative mx-auto aspect-[9/10] w-full max-w-md sm:max-w-lg">
+      {order.map((itemIndex, slotIndex) => {
+        const item = items[itemIndex]
+        const slot = SLOTS[slotIndex]
+        return (
+          <div
+            key={slotIndex}
+            className="absolute"
+            style={{ top: slot.top, left: slot.left, width: slot.width, height: slot.height, zIndex: slot.zIndex }}
+          >
+            <div ref={(el) => { floatRefs.current[slotIndex] = el }} className="h-full w-full">
               <div
                 className="h-full w-full rotate-(--tile-rotate) transition-transform duration-300 hover:z-50 hover:scale-105 hover:rotate-0"
                 style={{ '--tile-rotate': reduce ? '0deg' : `${slot.rotate}deg` } as CSSProperties}
               >
-                <Link
-                  to={`/work/${item.slug}`}
-                  className="group block h-full w-full overflow-hidden rounded-xl border border-line shadow-sm"
-                >
-                  <div className="relative h-full w-full">
-                    <img
-                      src={`https://picsum.photos/seed/${item.gallerySeeds[0]}/400/400`}
-                      alt=""
-                      loading="lazy"
-                      className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent p-2 pt-6">
-                      <p className="truncate text-[11px] font-medium text-bg">{item.company ?? item.title}</p>
+                <div ref={(el) => { contentRefs.current[slotIndex] = el }} className="h-full w-full">
+                  <Link
+                    to={`/work/${item.slug}`}
+                    className="group block h-full w-full overflow-hidden rounded-xl border border-line shadow-sm"
+                  >
+                    <div className="relative h-full w-full">
+                      <img
+                        src={`https://picsum.photos/seed/${item.gallerySeeds[0]}/400/400`}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent p-2 pt-6">
+                        <p className="truncate text-[11px] font-medium text-bg">{item.company ?? item.title}</p>
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               </div>
-            </motion.div>
-          )
-        })}
-      </div>
-    </LayoutGroup>
+            </div>
+          </div>
+        )
+      })}
+    </div>
   )
 }
