@@ -65,17 +65,17 @@ body {
   }
 }
 
-@keyframes watercolor-drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1.03); }
-  50% { transform: translate3d(-1.5%, 1%, 0) scale(1.06); }
+@keyframes watercolor-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(8%, 10%, 0) scale(1.15); }
 }
 
-@keyframes watercolor-boil-a {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+@keyframes watercolor-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.1); }
+  50% { transform: translate3d(-10%, -8%, 0) scale(0.95); }
 }
 
-@keyframes watercolor-boil-b {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
+@keyframes watercolor-drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(6%, -12%, 0) scale(1.2); }
 }
