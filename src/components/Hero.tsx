@@ -13,6 +13,11 @@ function WashLayer({ id, seed, className }: { id: string; seed: number; classNam
       className={`absolute inset-0 h-full w-full will-change-[opacity] ${className}`}
     >
       <defs>
+        <radialGradient id={`${id}-pigment`} cx="0.65" cy="0.5" r="0.6">
+          <stop offset="0" stopColor="#fbdf80" stopOpacity="0.4" />
+          <stop offset="0.7" stopColor="#f9d766" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#f6cf55" stopOpacity="0.62" />
+        </radialGradient>
         <filter
           id={id}
           filterUnits="userSpaceOnUse"
@@ -22,7 +27,7 @@ function WashLayer({ id, seed, className }: { id: string; seed: number; classNam
           height="1320"
           colorInterpolationFilters="sRGB"
         >
-          <feTurbulence type="fractalNoise" baseFrequency="0.005 0.008" numOctaves="3" seed={seed} result="lobes" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.005 0.008" numOctaves="3" seed="3" result="lobes" />
           <feDisplacementMap in="SourceGraphic" in2="lobes" scale="130" xChannelSelector="R" yChannelSelector="G" result="warped" />
           <feTurbulence type="fractalNoise" baseFrequency="0.028" numOctaves="4" seed={seed + 11} result="ragged" />
           <feDisplacementMap in="warped" in2="ragged" scale="26" xChannelSelector="G" yChannelSelector="B" result="shape" />
@@ -40,18 +45,7 @@ function WashLayer({ id, seed, className }: { id: string; seed: number; classNam
       </defs>
 
       <g filter={`url(#${id})`}>
-        <g fill="#fde8a0">
-          <ellipse cx="360" cy="250" rx="560" ry="380" opacity="0.42" />
-          <ellipse cx="760" cy="90" rx="400" ry="210" opacity="0.34" />
-          <ellipse cx="170" cy="540" rx="300" ry="190" opacity="0.5" />
-          <ellipse cx="560" cy="470" rx="240" ry="150" opacity="0.28" />
-        </g>
-        <g fill="#fbdf80">
-          <ellipse cx="1170" cy="300" rx="340" ry="310" opacity="0.5" />
-          <ellipse cx="1250" cy="390" rx="190" ry="200" opacity="0.5" />
-          <ellipse cx="1330" cy="70" rx="200" ry="120" opacity="0.42" />
-          <ellipse cx="930" cy="640" rx="260" ry="120" opacity="0.32" />
-        </g>
+        <ellipse cx="640" cy="350" rx="700" ry="275" fill={`url(#${id}-pigment)`} />
       </g>
     </svg>
   )
@@ -64,11 +58,11 @@ function Watercolor() {
       className="pointer-events-none absolute inset-0 -z-10 overflow-hidden [mask-image:linear-gradient(to_bottom,black_65%,transparent)]"
     >
       <div className="absolute inset-0" style={{ animation: 'watercolor-drift 24s ease-in-out infinite' }}>
-        <WashLayer id="wc-a" seed={3} className="[animation:watercolor-boil-a_6s_ease-in-out_infinite]" />
-        <WashLayer id="wc-b" seed={9} className="[animation:watercolor-boil-b_6s_ease-in-out_infinite]" />
+        <WashLayer id="wc-a" seed={3} className="[animation:watercolor-boil-a_10s_ease-in-out_infinite]" />
+        <WashLayer id="wc-b" seed={9} className="[animation:watercolor-boil-b_10s_ease-in-out_infinite]" />
       </div>
       <div
-        className="absolute inset-0 opacity-[0.16] mix-blend-multiply [animation:watercolor-grain_3s_steps(1)_infinite]"
+        className="absolute inset-0 opacity-[0.16] mix-blend-multiply"
         style={{ backgroundImage: fineGrain }}
       />
     </div>

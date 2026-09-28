@@ -79,8 +79,3 @@ body {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
 }
-
-@keyframes watercolor-grain {
-  0% { background-position: 0 0; }
-  50% { background-position: 97px 61px; }
-}
