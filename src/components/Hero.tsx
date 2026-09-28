@@ -40,7 +40,7 @@ function WashLayer({ id, seed, className }: { id: string; seed: number; classNam
       </defs>
 
       <g filter={`url(#${id})`}>
-        <g fill="#a3c8fb">
+        <g fill="#8fd0ff">
           <ellipse cx="360" cy="250" rx="560" ry="380" opacity="0.42" />
           <ellipse cx="760" cy="90" rx="400" ry="210" opacity="0.34" />
           <ellipse cx="170" cy="540" rx="300" ry="190" opacity="0.5" />
