@@ -2,24 +2,34 @@ import { motion, useReducedMotion } from 'motion/react'
 
 const lines = ['team leader,', 'product designer,', 'strategist and optimist.']
 
+const blobs = [
+  { pos: '-left-[10%] -top-[30%] h-[85%] w-[55%]', base: '#cfe3ff', tint: '#fff0bf', drift: 18, tintDur: 14, delay: 0 },
+  { pos: '-right-[8%] top-[5%] h-[80%] w-[50%]', base: '#fff0bf', tint: '#cfe3ff', drift: 22, tintDur: 17, delay: -5 },
+  { pos: 'left-[30%] top-[35%] h-[70%] w-[45%]', base: '#e3efff', tint: '#fff5cf', drift: 26, tintDur: 20, delay: -9 },
+]
+
 function Watercolor() {
   return (
     <div
       aria-hidden
       className="pointer-events-none absolute inset-0 -z-10 overflow-hidden [mask-image:linear-gradient(to_bottom,black_60%,transparent)]"
     >
-      <div
-        className="absolute -left-[10%] -top-[30%] h-[85%] w-[55%] rounded-full bg-[#b9d6ff] opacity-70 blur-3xl will-change-transform"
-        style={{ animation: 'watercolor-drift-a 18s ease-in-out infinite' }}
-      />
-      <div
-        className="absolute -right-[8%] top-[5%] h-[80%] w-[50%] rounded-full bg-[#fdeaa6] opacity-80 blur-3xl will-change-transform"
-        style={{ animation: 'watercolor-drift-b 22s ease-in-out infinite' }}
-      />
-      <div
-        className="absolute left-[30%] top-[35%] h-[70%] w-[45%] rounded-full bg-[#cfe3ff] opacity-60 blur-3xl will-change-transform"
-        style={{ animation: 'watercolor-drift-c 26s ease-in-out infinite' }}
-      />
+      {blobs.map((b, i) => (
+        <div
+          key={i}
+          className={`absolute ${b.pos} will-change-transform`}
+          style={{ animation: `watercolor-drift-${'abc'[i]} ${b.drift}s ease-in-out infinite` }}
+        >
+          <div
+            className="absolute inset-0 rounded-full opacity-80 blur-3xl will-change-[opacity]"
+            style={{ backgroundColor: b.base, animation: `watercolor-base ${b.tintDur}s ease-in-out ${b.delay}s infinite` }}
+          />
+          <div
+            className="absolute inset-0 rounded-full opacity-0 blur-3xl will-change-[opacity]"
+            style={{ backgroundColor: b.tint, animation: `watercolor-tint ${b.tintDur}s ease-in-out ${b.delay}s infinite` }}
+          />
+        </div>
+      ))}
     </div>
   )
 }
