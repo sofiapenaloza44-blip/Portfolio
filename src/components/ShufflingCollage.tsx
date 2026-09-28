@@ -129,7 +129,7 @@ export function ShufflingCollage() {
   }, [reduce])
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
+    <div className="relative isolate mx-auto aspect-square w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
       {CARDS.map(({ key, item }, i) => (
         <div
           key={key}

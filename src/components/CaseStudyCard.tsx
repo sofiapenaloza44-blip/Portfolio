@@ -5,7 +5,7 @@ export function CaseStudyCard({ study }: { study: CaseStudy }) {
   const tags = [study.company, study.role, study.timeline].filter(Boolean).join(' / ')
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-md transition-transform duration-300 hover:-translate-y-1 md:h-[280px] md:flex-row">
+    <article className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface/40 shadow-sm transition-transform duration-300 hover:-translate-y-1 md:h-[280px] md:flex-row">
       <Link
         to={`/work/${study.slug}`}
         tabIndex={-1}

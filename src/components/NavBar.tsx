@@ -45,7 +45,7 @@ export function NavBar() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-bg/90 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="whitespace-nowrap text-base font-semibold tracking-tight">
           {site.name}
