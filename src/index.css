@@ -1,12 +1,10 @@
 @import "tailwindcss";
 
-@import "@fontsource/quicksand/400.css";
-@import "@fontsource/quicksand/500.css";
-@import "@fontsource/quicksand/600.css";
-@import "@fontsource/quicksand/700.css";
-@import "@fontsource/playfair-display/500.css";
-@import "@fontsource/playfair-display/600.css";
-@import "@fontsource/playfair-display/700.css";
+@import "@fontsource-variable/newsreader/opsz.css";
+@import "@fontsource/karla/400.css";
+@import "@fontsource/karla/500.css";
+@import "@fontsource/karla/600.css";
+@import "@fontsource/karla/700.css";
 
 :root {
   --color-bg: #fafafa;
@@ -20,8 +18,8 @@
 }
 
 @theme {
-  --font-sans: "Quicksand", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-serif: "Playfair Display", ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: "Karla", system-ui, sans-serif;
+  --font-serif: "Newsreader Variable", Georgia, serif;
   --color-bg: var(--color-bg);
   --color-surface: var(--color-surface);
   --color-ink: var(--color-ink);
@@ -31,12 +29,31 @@
   --color-line: var(--color-line);
 }
 
-@layer base {
-  h1,
-  h2,
-  h3 {
-    font-family: var(--font-serif);
-  }
+/* Unlayered on purpose: the heading scale wins over per-element text-* utilities. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-optical-sizing: auto;
+  letter-spacing: -0.012em;
+  line-height: 1.14;
+}
+
+h1 {
+  font-size: clamp(2rem, 1.55rem + 2.1vw, 3.3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: clamp(1.65rem, 1.42rem + 1.05vw, 2.3rem);
+}
+
+h3 {
+  font-size: clamp(1.3rem, 1.16rem + 0.62vw, 1.65rem);
+  line-height: 1.2;
 }
 
 html {
@@ -47,7 +64,9 @@ body {
   background-color: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-weight: 500;
+  font-weight: 400;
+  font-size: 1.0625rem;
+  line-height: 1.75;
   -webkit-font-smoothing: antialiased;
 }
 
