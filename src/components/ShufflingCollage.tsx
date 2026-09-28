@@ -50,6 +50,11 @@ export function ShufflingCollage() {
     const place = (progress: number) => {
       currentProgressRef.current = progress
       items.forEach((_, i) => {
+        // A hovered tile is fully owned by the hover handlers below (frozen
+        // position, scaled up) — skip it entirely so this per-frame update
+        // doesn't fight that state.
+        if (hoveredRef.current === i) return
+
         const el = tileRefs.current[i]
         if (!el) return
         const phase = (progress + i) % N
@@ -59,19 +64,14 @@ export function ShufflingCollage() {
         const a = SLOTS[index]
         const b = SLOTS[next]
 
-        const isHovered = hoveredRef.current === i
-        const scale = isHovered ? LAYER_SCALE[2] * 1.05 : lerp(LAYER_SCALE[a.layer], LAYER_SCALE[b.layer], frac)
-        const opacity = isHovered ? 1 : lerp(LAYER_OPACITY[a.layer], LAYER_OPACITY[b.layer], frac)
-        const z = isHovered ? 100 : Math.round(lerp(LAYER_Z[a.layer], LAYER_Z[b.layer], frac)) + i
-
         gsap.set(el, {
           left: `${lerp(a.left, b.left, frac)}%`,
           top: `${lerp(a.top, b.top, frac)}%`,
           width: `${lerp(a.width, b.width, frac)}%`,
           height: `${lerp(a.height, b.height, frac)}%`,
-          zIndex: z,
-          scale,
-          opacity,
+          zIndex: Math.round(lerp(LAYER_Z[a.layer], LAYER_Z[b.layer], frac)) + i,
+          scale: lerp(LAYER_SCALE[a.layer], LAYER_SCALE[b.layer], frac),
+          opacity: lerp(LAYER_OPACITY[a.layer], LAYER_OPACITY[b.layer], frac),
         })
       })
     }
@@ -111,7 +111,10 @@ export function ShufflingCollage() {
           className="absolute"
           onMouseEnter={() => {
             hoveredRef.current = i
-            placeRef.current(currentProgressRef.current)
+            const el = tileRefs.current[i]
+            if (el) {
+              gsap.to(el, { scale: 1.1, opacity: 1, zIndex: 100, duration: 0.25, ease: 'power2.out' })
+            }
           }}
           onMouseLeave={() => {
             hoveredRef.current = null
