@@ -5,6 +5,7 @@ import { site } from '../data/site'
 
 const links = [
   { label: 'Portfolio', to: '/' },
+  { label: 'Featured work', to: '/featured-work' },
   { label: 'Career journey', to: '/career-journey' },
   { label: 'CV', href: site.cvUrl },
   { label: 'LinkedIn', href: site.linkedinUrl },

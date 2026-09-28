@@ -5,6 +5,7 @@ import { Footer } from './components/Footer'
 import { Home } from './pages/Home'
 import { CaseStudy } from './pages/CaseStudy'
 import { CareerJourney } from './pages/CareerJourney'
+import { FeaturedWork } from './pages/FeaturedWork'
 import { NotFound } from './pages/NotFound'
 
 function ScrollToTop() {
@@ -25,6 +26,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/work/:slug" element={<CaseStudy />} />
+            <Route path="/featured-work" element={<FeaturedWork />} />
             <Route path="/career-journey" element={<CareerJourney />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
