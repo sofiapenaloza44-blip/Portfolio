@@ -4,7 +4,7 @@ import { useReducedMotion } from 'motion/react'
 import { gsap } from 'gsap'
 import { allCaseStudies } from '../data/work'
 
-const items = allCaseStudies.slice(0, 9)
+const items = allCaseStudies.slice(0, 12)
 
 // Custom icon-illustration cards, one per case study, replacing the
 // picsum photo placeholders. Two are still pending (fall back to the
@@ -18,6 +18,9 @@ const ICON_SLUGS = new Set([
   'skooli-classroom-experience',
   'bbva-appointment-scheduling',
   'stori-black-card-beta',
+  'teradata-ai-assistant-trust',
+  'teradata-one-identity',
+  'santander-mobile-app-features',
 ])
 
 // Reverse-engineered from the "Orbit Globe" canvas template behind the
@@ -27,7 +30,7 @@ const ICON_SLUGS = new Set([
 // 3D position back to 2D each frame (below) is what produces the
 // size/opacity/z-index depth cues on its own — there's no separate
 // "3 layers" system, depth falls straight out of the projection math.
-const BAND_LAT_DEG = [-30, 0, 30]
+const BAND_LAT_DEG = [-33, -11, 11, 33]
 const BAND_STAGGER = 0.37 // radians — offsets each ring so cards don't line up vertically
 const PER_BAND = Math.ceil(items.length / BAND_LAT_DEG.length)
 
@@ -40,12 +43,12 @@ const CARDS = items.map((item, i) => {
 })
 
 const GLOBE_SIZE = 60 // % of container size — sphere radius
-const CARD_SIZE = 26 // % of container size — card width/height at full (front-most) scale
+const CARD_SIZE = 22 // % of container size — card width/height at full (front-most) scale
 const CAMERA = GLOBE_SIZE * 1.5
 const TILT_DEG = 24 // tilts the whole projected sphere, like the reference video
 const BACK_FADE = 0.4
 const DIRECTION = 1
-const REVOLUTION_SECONDS = 30
+const REVOLUTION_SECONDS = 34
 
 const tiltRad = (TILT_DEG * Math.PI) / 180
 const cosTilt = Math.cos(tiltRad)

@@ -23,6 +23,10 @@ export type IndustryGroup = {
 // existing portfolio. Everything under "challenge", "process", and
 // "outcome" is DEMO content, drafted to show how a full case study page
 // reads. Replace it with real specifics once the Figma files are shared.
+// The three "enterprise-software" and "santander-mobile-app-features"
+// entries are newer additions without source copy yet, so their
+// "overview" is drafted DEMO content too — replace all four sections
+// once Sofia's own description of that work is available.
 
 export const industries: IndustryGroup[] = [
   {
@@ -93,6 +97,27 @@ export const industries: IndustryGroup[] = [
         outcome:
           'The scheduling feature rolled out across BBVA Mexico branches, giving customers a safer, predictable way to visit during a period when branch capacity was tightly restricted.',
         gallerySeeds: ['bbva-appointment-booking', 'bbva-branch-confirmation', 'bbva-branch-safety'],
+      },
+      {
+        slug: 'santander-mobile-app-features',
+        company: 'Santander Mexico',
+        title: 'Mobile app feature design at Santander Mexico',
+        summary: "Designing new features for Santander Mexico's mobile banking app.",
+        role: 'Product Designer',
+        timeline: '2018',
+        overview:
+          "I designed new features for Santander Mexico's mobile banking app, working closely with product and engineering to take them from concept to a shippable experience for millions of existing banking customers.",
+        challenge:
+          "Any new feature had to fit into an app already carrying years of accumulated functionality, for a user base spanning a huge range of banking experience and digital literacy, without adding friction to the core flows customers relied on daily.",
+        process: [
+          'Audited the existing app\'s flows to find where a new feature could reuse an established pattern instead of introducing a new one.',
+          'Prototyped the feature at low fidelity first and tested it against the bank\'s most common customer support questions.',
+          'Worked with engineering early to understand constraints from the core banking systems before finalizing the design.',
+          'Ran a phased rollout, watching support ticket volume as a signal for where the new feature still confused customers.',
+        ],
+        outcome:
+          'The feature shipped to the full customer base without a spike in support tickets, and the low-fidelity-first process became a pattern the team reused for later app features.',
+        gallerySeeds: ['santander-mobile-app-features', 'santander-mobile-app-flow'],
       },
     ],
   },
@@ -247,6 +272,56 @@ export const industries: IndustryGroup[] = [
         outcome:
           "Announcements followed a consistent, recognizable format, and major product launches got same-day internal coverage instead of a delayed recap.",
         gallerySeeds: ['sony-intranet-redesign', 'sony-launch-event', 'sony-internal-campaign'],
+      },
+    ],
+  },
+  {
+    slug: 'enterprise-software',
+    name: 'Enterprise software industry',
+    icon: 'cpu',
+    caseStudies: [
+      {
+        slug: 'teradata-ai-assistant-trust',
+        company: 'Teradata',
+        title: 'An AI assistant that turns usage data into B2B trust',
+        summary:
+          'Designing an in-product AI assistant that surfaces usage insights customers could act on and trust.',
+        role: 'Product Designer',
+        timeline: '2023 to 2024',
+        overview:
+          "Teradata's enterprise customers generate huge volumes of platform usage data, but most of it went unused because no one on the customer side had time to dig through it. I worked on an AI assistant embedded directly in the product that surfaces that usage data as plain-language, actionable insights, with the goal of making customers trust an automated recommendation enough to act on it.",
+        challenge:
+          "Enterprise buyers are naturally skeptical of AI-generated recommendations touching their infrastructure, so the assistant had to earn trust before it could earn adoption. It also had to work for a wide range of technical fluency, from data engineers to less technical account stakeholders.",
+        process: [
+          'Interviewed technical and non-technical stakeholders separately to see where their trust in an automated recommendation broke down.',
+          'Designed the assistant to always surface the underlying data behind a recommendation, not just the recommendation itself.',
+          'Prototyped several levels of explanation depth and tested which one let both audiences act with confidence.',
+          'Piloted the assistant with a handful of enterprise accounts before the broader rollout, tracking how often a recommendation was actually acted on.',
+        ],
+        outcome:
+          'The assistant launched with a transparency-first pattern that let both technical and non-technical stakeholders trace any recommendation back to its source data, which became the template for how the team designed AI-assisted features afterward.',
+        gallerySeeds: ['teradata-ai-assistant-dashboard', 'teradata-ai-assistant-insights'],
+      },
+      {
+        slug: 'teradata-one-identity',
+        company: 'Teradata',
+        title: 'One Identity: a single login across Teradata products',
+        summary: "Replacing a separate login per product with a single identity across Teradata's suite.",
+        role: 'Product Designer',
+        timeline: '2023',
+        overview:
+          'Customers using more than one Teradata product had to sign in and manage access separately for each one. I worked on One Identity, a unified authentication and account experience that let a single login carry across the whole product suite.',
+        challenge:
+          "Each product had grown its own account and permissions model over time, so unifying login meant reconciling different assumptions about roles and access, without breaking existing customers' workflows mid-migration.",
+        process: [
+          'Mapped the account and permission models across each product to find where they conflicted rather than just differed.',
+          'Designed a migration path that moved customers to the unified identity without forcing a disruptive one-time cutover.',
+          'Worked with security and engineering to define a single permissions model flexible enough to express every product\'s existing roles.',
+          'Tested the new sign-in flow with customers who used multiple products, since they had the most to gain and the most existing setup to migrate.',
+        ],
+        outcome:
+          'Customers on more than one product moved to a single sign-in without losing existing access, and new products built afterward could plug into the same identity system instead of building their own.',
+        gallerySeeds: ['teradata-one-identity-login', 'teradata-one-identity-accounts'],
       },
     ],
   },

@@ -59,7 +59,9 @@ npx playwright open https://sofiapenaloza44-blip.github.io/Portfolio/
 
 - `src/data/work.ts` — case studies grouped by industry. The `overview` field for each is
   Sofia's own copy; `challenge`, `process`, and `outcome` are demo placeholder content and
-  should be replaced with real specifics.
+  should be replaced with real specifics. The Santander Mexico and Teradata (One Identity,
+  AI assistant) case studies are newer additions without source copy yet, so their
+  `overview` is placeholder content too.
 - `src/data/career.ts` — the timeline shown on the "Career journey" page.
 - `src/data/learnings.ts` — certifications shown in "Latest learnings".
 - `src/data/site.ts` — contact email, CV link, and LinkedIn URL. All placeholders, replace
