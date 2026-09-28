@@ -13,7 +13,7 @@ const links = [
 ]
 
 const linkStyle =
-  'underline decoration-transparent decoration-2 underline-offset-4 transition-colors hover:decoration-gold'
+  'rounded-full px-3 py-1 underline decoration-transparent decoration-2 underline-offset-4 transition-colors hover:decoration-gold'
 
 function NavLink({ link, active, onClick }: { link: (typeof links)[number]; active: boolean; onClick?: () => void }) {
   if (link.to) {
@@ -21,7 +21,7 @@ function NavLink({ link, active, onClick }: { link: (typeof links)[number]; acti
       <Link
         to={link.to}
         onClick={onClick}
-        className={`${linkStyle} ${active ? 'font-bold text-gold-text' : ''}`}
+        className={`${linkStyle} ${active ? 'bg-gold font-bold text-ink' : ''}`}
       >
         {link.label}
       </Link>
@@ -51,7 +51,7 @@ export function NavBar() {
           {site.name}
         </Link>
 
-        <ul className="hidden items-center gap-6 text-sm text-ink-soft md:flex">
+        <ul className="hidden items-center gap-1 text-sm text-ink-soft md:flex">
           {links.map((link) => (
             <li key={link.label}>
               <NavLink link={link} active={location.pathname === link.to} />
