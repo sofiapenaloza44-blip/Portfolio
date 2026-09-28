@@ -9,7 +9,7 @@ Product design portfolio, rebuilt as a static React site (previously a Google Si
 - [React Router](https://reactrouter.com) for the home page and individual case study routes
 - [Motion](https://motion.dev) for scroll reveals and the hero entrance
 - [Phosphor Icons](https://phosphoricons.com)
-- Self-hosted [Quicksand](https://fonts.google.com/specimen/Quicksand) (body and UI) via `@fontsource/quicksand`, and [Playfair Display](https://fonts.google.com/specimen/Playfair+Display) (headings) via `@fontsource/playfair-display`
+- Self-hosted [DM Sans](https://fonts.google.com/specimen/DM+Sans) (body and UI) via `@fontsource/dm-sans`, and [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk) (headings) via `@fontsource/space-grotesk`
 
 ## Development
 
