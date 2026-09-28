@@ -25,8 +25,8 @@ const CARDS = items.map((item, i) => {
   return { item, lat, longitude }
 })
 
-const GLOBE_SIZE = 60 // % of container size — sphere radius
-const CARD_SIZE = 22 // % of container size — card width/height at full (front-most) scale
+const GLOBE_SIZE = 50 // % of container size — sphere radius
+const CARD_SIZE = 27.5 // % of container size — card width/height at full (front-most) scale
 const CAMERA = GLOBE_SIZE * 1.5
 const TILT_DEG = 24 // tilts the whole projected sphere, like the reference video
 const BACK_FADE = 0.4
@@ -128,15 +128,12 @@ export function ShufflingCollage() {
             placeRef.current(currentProgressRef.current)
           }}
         >
-          <Link
-            to={`/work/${item.slug}`}
-            className="block h-full w-full overflow-hidden rounded-xl border border-line bg-bg shadow-sm"
-          >
+          <Link to={`/work/${item.slug}`} className="block h-full w-full">
             <img
               src={`case-studies/${item.slug}.png`}
               alt={item.title}
               loading="lazy"
-              className="h-full w-full object-contain p-3"
+              className="h-full w-full object-contain"
             />
           </Link>
         </div>
