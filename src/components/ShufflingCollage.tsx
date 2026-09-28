@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useReducedMotion } from 'motion/react'
 import { gsap } from 'gsap'
@@ -20,33 +20,36 @@ const ICON_SLUGS = new Set([
   'stori-black-card-beta',
 ])
 
-// Measured directly off the reference screenshot (percent of a 966x972
-// container), then ordered clockwise around the cluster's centroid so
-// tiles can flow smoothly from one measured position to the next. `layer`
-// (0 back, 1 mid, 2 front) sets depth: z-index, scale, and opacity.
-const SLOTS = [
-  { left: 35.2, top: 35.2, width: 28.8, height: 28.6, layer: 1 },
-  { left: 61.3, top: 49.1, width: 24.2, height: 25.7, layer: 2 },
-  { left: 44.0, top: 68.2, width: 23.8, height: 23.9, layer: 2 },
-  { left: 18.3, top: 56.6, width: 24.1, height: 25.2, layer: 2 },
-  { left: 7.1, top: 46.8, width: 20.8, height: 18.5, layer: 1 },
-  { left: 10.9, top: 25.2, width: 28.0, height: 25.2, layer: 1 },
-  { left: 26.5, top: 9.5, width: 15.2, height: 23.5, layer: 0 },
-  { left: 40.4, top: 10.0, width: 25.4, height: 24.0, layer: 0 },
-  { left: 65.7, top: 23.9, width: 23.5, height: 23.7, layer: 0 },
-]
+// Reverse-engineered from the "Orbit Globe" canvas template behind the
+// animo-orbit-globe reference video: each card sits at a fixed
+// (latitude, longitude) on an imaginary sphere, and every card spins
+// together around the sphere's vertical axis over time. Projecting that
+// 3D position back to 2D each frame (below) is what produces the
+// size/opacity/z-index depth cues on its own — there's no separate
+// "3 layers" system, depth falls straight out of the projection math.
+const BAND_LAT_DEG = [-30, 0, 30]
+const BAND_STAGGER = 0.37 // radians — offsets each ring so cards don't line up vertically
+const PER_BAND = Math.ceil(items.length / BAND_LAT_DEG.length)
 
-const LAYER_Z = [10, 20, 30]
-const LAYER_SCALE = [0.86, 1, 1.12]
-const LAYER_OPACITY = [0.82, 0.95, 1]
-const TILT = [-3, 2, -2, 3, -3, 2, -2, 3, -1] // small fixed per-tile tilt, unrelated to path position
+const CARDS = items.map((item, i) => {
+  const band = Math.floor(i / PER_BAND)
+  const posInBand = i % PER_BAND
+  const lat = (BAND_LAT_DEG[band] * Math.PI) / 180
+  const longitude = band * BAND_STAGGER + (posInBand * 2 * Math.PI) / PER_BAND
+  return { item, lat, longitude }
+})
 
-const REVOLUTION_SECONDS = 32
-const N = SLOTS.length
+const GLOBE_SIZE = 60 // % of container size — sphere radius
+const CARD_SIZE = 26 // % of container size — card width/height at full (front-most) scale
+const CAMERA = GLOBE_SIZE * 1.5
+const TILT_DEG = 24 // tilts the whole projected sphere, like the reference video
+const BACK_FADE = 0.4
+const DIRECTION = 1
+const REVOLUTION_SECONDS = 30
 
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t
-}
+const tiltRad = (TILT_DEG * Math.PI) / 180
+const cosTilt = Math.cos(tiltRad)
+const sinTilt = Math.sin(tiltRad)
 
 export function ShufflingCollage() {
   const reduce = useReducedMotion()
@@ -56,14 +59,9 @@ export function ShufflingCollage() {
   const placeRef = useRef<(progress: number) => void>(() => {})
 
   useEffect(() => {
-    // Each tile follows the same clockwise path around the measured
-    // slots, offset from the others by one slot, so at any instant every
-    // slot is occupied by exactly one tile while all 9 continuously flow
-    // from slot to slot (the "ring" motion) instead of jumping between
-    // fixed positions.
     const place = (progress: number) => {
       currentProgressRef.current = progress
-      items.forEach((_, i) => {
+      CARDS.forEach(({ lat, longitude }, i) => {
         // A hovered tile is fully owned by the hover handlers below (frozen
         // position, scaled up) — skip it entirely so this per-frame update
         // doesn't fight that state.
@@ -71,30 +69,39 @@ export function ShufflingCollage() {
 
         const el = tileRefs.current[i]
         if (!el) return
-        const phase = (progress + i) % N
-        const index = Math.floor(phase)
-        const next = (index + 1) % N
-        const frac = phase - index
-        const a = SLOTS[index]
-        const b = SLOTS[next]
+
+        const longitudeNow = longitude + DIRECTION * 2 * Math.PI * progress
+        const ringRadius = Math.cos(lat)
+        const height3d = Math.sin(lat)
+        const x3d = Math.sin(longitudeNow) * ringRadius
+        const facing = Math.cos(longitudeNow) * ringRadius // -1 (back) .. 1 (front)
+
+        const depth = CAMERA + GLOBE_SIZE * (1 - facing)
+        const perspective = CAMERA / depth
+        const px = GLOBE_SIZE * x3d * perspective
+        const py = -GLOBE_SIZE * height3d * perspective
+
+        const sx = 50 + px * cosTilt - py * sinTilt
+        const sy = 50 + px * sinTilt + py * cosTilt
+        const size = CARD_SIZE * perspective
 
         gsap.set(el, {
-          left: `${lerp(a.left, b.left, frac)}%`,
-          top: `${lerp(a.top, b.top, frac)}%`,
-          width: `${lerp(a.width, b.width, frac)}%`,
-          height: `${lerp(a.height, b.height, frac)}%`,
-          zIndex: Math.round(lerp(LAYER_Z[a.layer], LAYER_Z[b.layer], frac)) + i,
-          scale: lerp(LAYER_SCALE[a.layer], LAYER_SCALE[b.layer], frac),
-          opacity: lerp(LAYER_OPACITY[a.layer], LAYER_OPACITY[b.layer], frac),
+          left: `${sx - size / 2}%`,
+          top: `${sy - size / 2}%`,
+          width: `${size}%`,
+          height: `${size}%`,
+          opacity: 1 - BACK_FADE * ((1 - facing) / 2),
+          zIndex: Math.round((facing + 1) * 45),
+          scale: 1,
         })
       })
     }
 
     placeRef.current = place
 
-    // Static positions, no ongoing motion, for reduced-motion viewers.
-    // Hover handlers below call placeRef.current directly to still react,
-    // since there's no running loop to pick up the change otherwise.
+    // Static pose, no ongoing motion, for reduced-motion viewers. Hover
+    // handlers below call placeRef.current directly to still react, since
+    // there's no running loop to pick up the change otherwise.
     if (reduce) {
       place(0)
       return
@@ -102,7 +109,7 @@ export function ShufflingCollage() {
 
     const proxy = { progress: 0 }
     const tween = gsap.to(proxy, {
-      progress: N,
+      progress: 1,
       duration: REVOLUTION_SECONDS,
       ease: 'none',
       repeat: -1,
@@ -116,7 +123,7 @@ export function ShufflingCollage() {
 
   return (
     <div className="relative mx-auto aspect-square w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
-      {items.map((item, i) => (
+      {CARDS.map(({ item }, i) => (
         <div
           key={item.slug}
           ref={(el) => {
@@ -127,7 +134,7 @@ export function ShufflingCollage() {
             hoveredRef.current = i
             const el = tileRefs.current[i]
             if (el) {
-              gsap.to(el, { scale: 1.1, opacity: 1, zIndex: 100, duration: 0.25, ease: 'power2.out' })
+              gsap.to(el, { scale: 1.1, opacity: 1, zIndex: 1000, duration: 0.25, ease: 'power2.out' })
             }
           }}
           onMouseLeave={() => {
@@ -135,36 +142,31 @@ export function ShufflingCollage() {
             placeRef.current(currentProgressRef.current)
           }}
         >
-          <div
-            className="h-full w-full rotate-(--tile-rotate) transition-transform duration-300"
-            style={{ '--tile-rotate': reduce ? '0deg' : `${TILT[i]}deg` } as CSSProperties}
+          <Link
+            to={`/work/${item.slug}`}
+            className="group block h-full w-full overflow-hidden rounded-xl border border-line bg-bg shadow-sm"
           >
-            <Link
-              to={`/work/${item.slug}`}
-              className="group block h-full w-full overflow-hidden rounded-xl border border-line bg-bg shadow-sm"
-            >
-              {ICON_SLUGS.has(item.slug) ? (
+            {ICON_SLUGS.has(item.slug) ? (
+              <img
+                src={`case-studies/${item.slug}.png`}
+                alt={item.title}
+                loading="lazy"
+                className="h-full w-full object-contain p-3"
+              />
+            ) : (
+              <div className="relative h-full w-full">
                 <img
-                  src={`case-studies/${item.slug}.png`}
-                  alt={item.title}
+                  src={`https://picsum.photos/seed/${item.gallerySeeds[0]}/400/400`}
+                  alt=""
                   loading="lazy"
-                  className="h-full w-full object-contain p-3"
+                  className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
                 />
-              ) : (
-                <div className="relative h-full w-full">
-                  <img
-                    src={`https://picsum.photos/seed/${item.gallerySeeds[0]}/400/400`}
-                    alt=""
-                    loading="lazy"
-                    className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent p-2 pt-6">
-                    <p className="truncate text-[11px] font-medium text-bg">{item.company ?? item.title}</p>
-                  </div>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent p-2 pt-6">
+                  <p className="truncate text-[11px] font-medium text-bg">{item.company ?? item.title}</p>
                 </div>
-              )}
-            </Link>
-          </div>
+              </div>
+            )}
+          </Link>
         </div>
       ))}
     </div>
