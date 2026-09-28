@@ -9,13 +9,14 @@
 @import "@fontsource/playfair-display/700.css";
 
 :root {
-  --color-bg: #0c1a33;
-  --color-surface: #142647;
-  --color-ink: #eef3fb;
-  --color-ink-soft: #9fb1cf;
+  --color-bg: #fafafa;
+  --color-surface: #f0f1f5;
+  --color-ink: #0f1222;
+  --color-ink-soft: #4a4f66;
   --color-gold: #f2c723;
-  --color-line: rgb(238 243 251 / 14%);
-  color-scheme: dark;
+  --color-gold-text: #7a5c00;
+  --color-line: rgb(15 18 34 / 10%);
+  color-scheme: light;
 }
 
 @theme {
@@ -26,6 +27,7 @@
   --color-ink: var(--color-ink);
   --color-ink-soft: var(--color-ink-soft);
   --color-gold: var(--color-gold);
+  --color-gold-text: var(--color-gold-text);
   --color-line: var(--color-line);
 }
 
@@ -60,4 +62,19 @@ body {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+@keyframes watercolor-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(8%, 10%, 0) scale(1.15); }
+}
+
+@keyframes watercolor-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.1); }
+  50% { transform: translate3d(-10%, -8%, 0) scale(0.95); }
+}
+
+@keyframes watercolor-drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(6%, -12%, 0) scale(1.2); }
 }

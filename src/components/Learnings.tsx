@@ -9,7 +9,7 @@ export function Learnings() {
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,320px)_1fr]">
         <RevealSection>
           <div className="flex h-full flex-col justify-between rounded-2xl border border-line bg-surface p-6">
-            <Certificate size={32} weight="light" className="text-gold" />
+            <Certificate size={32} weight="light" className="text-gold-text" />
             <div className="mt-6">
               <p className="text-sm text-ink-soft">Member of</p>
               <p className="text-lg font-semibold tracking-tight">{membership.org}</p>
@@ -21,7 +21,7 @@ export function Learnings() {
           {learnings.map((item, i) => (
             <RevealSection key={item.title} delay={i * 0.05} className="flex items-start gap-4 py-5 first:pt-0">
               {item.status === 'completed' ? (
-                <CheckCircle size={22} weight="light" className="mt-0.5 shrink-0 text-gold" />
+                <CheckCircle size={22} weight="light" className="mt-0.5 shrink-0 text-gold-text" />
               ) : (
                 <Hourglass size={22} weight="light" className="mt-0.5 shrink-0 text-ink-soft" />
               )}

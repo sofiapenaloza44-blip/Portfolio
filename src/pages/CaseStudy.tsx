@@ -21,7 +21,7 @@ export function CaseStudy() {
         </Link>
 
         <div className="mt-8 flex items-start gap-3 rounded-xl border border-line bg-surface p-4 text-sm text-ink-soft">
-          <Info size={18} className="mt-0.5 shrink-0 text-gold" />
+          <Info size={18} className="mt-0.5 shrink-0 text-gold-text" />
           <p>
             The overview below is Sofia's own description of this project. The challenge, process, and outcome
             sections are demo content, drafted to show the shape of a full case study. They will be replaced with
@@ -75,7 +75,7 @@ export function CaseStudy() {
           <ol className="mt-4 space-y-4">
             {caseStudy.process.map((step, i) => (
               <li key={step} className="flex gap-4">
-                <span className="text-sm font-semibold text-gold">{String(i + 1).padStart(2, '0')}</span>
+                <span className="text-sm font-semibold text-gold-text">{String(i + 1).padStart(2, '0')}</span>
                 <span className="leading-relaxed text-ink-soft">{step}</span>
               </li>
             ))}

@@ -21,7 +21,7 @@ function NavLink({ link, active, onClick }: { link: (typeof links)[number]; acti
       <Link
         to={link.to}
         onClick={onClick}
-        className={`${linkStyle} ${active ? 'text-gold' : ''}`}
+        className={`${linkStyle} ${active ? 'font-bold text-gold-text' : ''}`}
       >
         {link.label}
       </Link>
