@@ -67,5 +67,7 @@ npx playwright open https://sofiapenaloza44-blip.github.io/Portfolio/
 - `src/data/site.ts` — contact email, CV link, and LinkedIn URL. All placeholders, replace
   before publishing.
 
-Case study and card images currently load from `picsum.photos` as placeholders (see
-`gallerySeeds` in `work.ts`). Swap these for real project images once available.
+The Featured Work collage on the home page uses a custom icon PNG per case study
+(`public/case-studies/<slug>.png`). Each case study's own detail page still loads its hero and
+gallery images from `picsum.photos` as placeholders (see `gallerySeeds` in `work.ts`) — swap
+these for real project images once available.

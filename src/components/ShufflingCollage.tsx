@@ -6,23 +6,6 @@ import { allCaseStudies } from '../data/work'
 
 const items = allCaseStudies.slice(0, 12)
 
-// Custom icon-illustration cards, one per case study, replacing the
-// picsum photo placeholders. One is still pending (falls back to the
-// photo placeholder until provided): stori-compliant-application.
-const ICON_SLUGS = new Set([
-  'sony-internal-communications',
-  'frisa-sales-system-modernization',
-  'litera-edtech-foundations',
-  'customer-obsession',
-  'skooli-classroom-experience',
-  'bbva-appointment-scheduling',
-  'stori-black-card-beta',
-  'teradata-ai-assistant-trust',
-  'teradata-one-identity',
-  'santander-mobile-app-features',
-  'design-system-implementation',
-])
-
 // Reverse-engineered from the "Orbit Globe" canvas template behind the
 // animo-orbit-globe reference video: each card sits at a fixed
 // (latitude, longitude) on an imaginary sphere, and every card spins
@@ -147,28 +130,14 @@ export function ShufflingCollage() {
         >
           <Link
             to={`/work/${item.slug}`}
-            className="group block h-full w-full overflow-hidden rounded-xl border border-line bg-bg shadow-sm"
+            className="block h-full w-full overflow-hidden rounded-xl border border-line bg-bg shadow-sm"
           >
-            {ICON_SLUGS.has(item.slug) ? (
-              <img
-                src={`case-studies/${item.slug}.png`}
-                alt={item.title}
-                loading="lazy"
-                className="h-full w-full object-contain p-3"
-              />
-            ) : (
-              <div className="relative h-full w-full">
-                <img
-                  src={`https://picsum.photos/seed/${item.gallerySeeds[0]}/400/400`}
-                  alt=""
-                  loading="lazy"
-                  className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
-                />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent p-2 pt-6">
-                  <p className="truncate text-[11px] font-medium text-bg">{item.company ?? item.title}</p>
-                </div>
-              </div>
-            )}
+            <img
+              src={`case-studies/${item.slug}.png`}
+              alt={item.title}
+              loading="lazy"
+              className="h-full w-full object-contain p-3"
+            />
           </Link>
         </div>
       ))}
