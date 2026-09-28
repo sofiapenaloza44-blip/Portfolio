@@ -6,12 +6,13 @@
 @import "@fontsource/outfit/700.css";
 
 :root {
-  --color-bg: #f6f2e9;
-  --color-surface: #efe9db;
-  --color-ink: #1c1a16;
-  --color-ink-soft: #55503f;
-  --color-gold: #a9812c;
-  --color-line: rgb(28 26 22 / 12%);
+  --color-bg: #0c1a33;
+  --color-surface: #142647;
+  --color-ink: #eef3fb;
+  --color-ink-soft: #9fb1cf;
+  --color-gold: #f2c723;
+  --color-line: rgb(238 243 251 / 14%);
+  color-scheme: dark;
 }
 
 @theme {
