@@ -7,9 +7,8 @@ import { allCaseStudies } from '../data/work'
 const items = allCaseStudies.slice(0, 12)
 
 // Custom icon-illustration cards, one per case study, replacing the
-// picsum photo placeholders. Two are still pending (fall back to the
-// photo placeholder until provided): stori-compliant-application and
-// design-system-implementation.
+// picsum photo placeholders. One is still pending (falls back to the
+// photo placeholder until provided): stori-compliant-application.
 const ICON_SLUGS = new Set([
   'sony-internal-communications',
   'frisa-sales-system-modernization',
@@ -21,6 +20,7 @@ const ICON_SLUGS = new Set([
   'teradata-ai-assistant-trust',
   'teradata-one-identity',
   'santander-mobile-app-features',
+  'design-system-implementation',
 ])
 
 // Reverse-engineered from the "Orbit Globe" canvas template behind the
