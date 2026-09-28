@@ -6,8 +6,8 @@ export type CareerStop = {
   caseStudySlug?: string
 }
 
-// Ordered chronologically from the case studies above. Confirm exact
-// start/end dates and add any roles or gaps that are missing.
+// Ordered oldest first; the Career journey page displays them most recent
+// first. Confirm exact start/end dates and add any roles or gaps that are missing.
 export const careerStops: CareerStop[] = [
   {
     role: 'Graphic and Product Designer',

@@ -18,7 +18,7 @@ export function Home() {
             software. Click any of them to jump straight to the case study.
           </p>
         </RevealSection>
-        <RevealSection delay={0.1} className="mt-14">
+        <RevealSection delay={0.1} className="mt-4">
           <ShufflingCollage />
         </RevealSection>
       </section>

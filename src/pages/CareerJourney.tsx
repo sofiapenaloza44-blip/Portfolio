@@ -11,7 +11,7 @@ export function CareerJourney() {
       </p>
 
       <ol className="mt-12 space-y-10 border-l border-line pl-6">
-        {careerStops.map((stop, i) => (
+        {[...careerStops].reverse().map((stop, i) => (
           <RevealSection key={`${stop.company}-${stop.period}`} delay={i * 0.04} className="relative">
             <span className="absolute -left-[1.65rem] top-1.5 h-2.5 w-2.5 rounded-full bg-gold" />
             <p className="text-sm text-ink-soft">{stop.period}</p>
