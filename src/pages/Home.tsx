@@ -20,7 +20,7 @@ export function Home() {
       <Hero />
       <Philosophy />
 
-      <section className="mx-auto max-w-5xl px-4 py-20 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <RevealSection className="text-center">
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Main case studies</h2>
           <p className="mx-auto mt-4 max-w-md text-ink-soft">
