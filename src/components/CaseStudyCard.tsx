@@ -22,7 +22,7 @@ export function CaseStudyCard({ study }: { study: CaseStudy }) {
 
       <div className="flex flex-col justify-center gap-3 p-8 md:px-12 md:py-6">
         <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ink-soft">{tags}</p>
-        <h3 className="text-2xl font-semibold leading-tight tracking-tight md:text-4xl">{study.title}</h3>
+        <h3 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">{study.title}</h3>
         <p className="max-w-xl text-ink-soft">{study.summary}</p>
         <Link
           to={`/work/${study.slug}`}
