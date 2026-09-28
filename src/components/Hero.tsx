@@ -3,9 +3,9 @@ import { motion, useReducedMotion } from 'motion/react'
 const lines = ['team leader,', 'product designer,', 'strategist and optimist.']
 
 const blobs = [
-  { pos: '-left-[10%] -top-[30%] h-[85%] w-[55%]', base: '#cfe3ff', tint: '#fff0bf', drift: 18, tintDur: 14, delay: 0 },
-  { pos: '-right-[8%] top-[5%] h-[80%] w-[50%]', base: '#fff0bf', tint: '#cfe3ff', drift: 22, tintDur: 17, delay: -5 },
-  { pos: 'left-[30%] top-[35%] h-[70%] w-[45%]', base: '#e3efff', tint: '#fff5cf', drift: 26, tintDur: 20, delay: -9 },
+  { pos: '-left-[10%] -top-[30%] h-[85%] w-[55%]', base: '#e2eeff', tint: '#fff6d6', drift: 18, tintDur: 14, delay: 0 },
+  { pos: '-right-[8%] top-[5%] h-[80%] w-[50%]', base: '#fff6d6', tint: '#e2eeff', drift: 22, tintDur: 17, delay: -5 },
+  { pos: 'left-[30%] top-[35%] h-[70%] w-[45%]', base: '#eef5ff', tint: '#fffae3', drift: 26, tintDur: 20, delay: -9 },
 ]
 
 function Watercolor() {
