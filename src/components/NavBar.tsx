@@ -12,17 +12,16 @@ const links = [
   { label: 'Contact', href: `mailto:${site.email}` },
 ]
 
+const linkStyle =
+  'underline decoration-transparent decoration-2 underline-offset-4 transition-colors hover:decoration-gold'
+
 function NavLink({ link, active, onClick }: { link: (typeof links)[number]; active: boolean; onClick?: () => void }) {
   if (link.to) {
     return (
       <Link
         to={link.to}
         onClick={onClick}
-        className={
-          active
-            ? 'text-ink underline decoration-gold decoration-2 underline-offset-4'
-            : 'transition-colors hover:text-ink'
-        }
+        className={`${linkStyle} ${active ? 'text-gold' : ''}`}
       >
         {link.label}
       </Link>
@@ -34,7 +33,7 @@ function NavLink({ link, active, onClick }: { link: (typeof links)[number]; acti
       target={link.href?.startsWith('http') ? '_blank' : undefined}
       rel="noreferrer"
       onClick={onClick}
-      className="transition-colors hover:text-ink"
+      className={linkStyle}
     >
       {link.label}
     </a>
