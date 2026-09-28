@@ -9,6 +9,9 @@ import { findCaseStudy, type CaseStudy } from '../data/work'
 // tracked card's path, and template-matching each icon to its slot), so
 // ring counts, spacing, speed and which icon sits where all match it.
 // Units are % of the container's side, like the template's % of the frame.
+// The three main case studies keep their captioned artwork in the globe.
+const CAPTIONED = new Set(['teradata-ai-assistant-trust', 'teradata-one-identity', 'stori-compliant-application'])
+
 const GLOBE_SIZE = 48 // sphere radius
 const CARD_SIZE = 30 // card width/height when directly facing the viewer
 const GAP = 4.5 // spacing between cards along a ring and between rings
@@ -151,7 +154,7 @@ export function ShufflingCollage() {
             className="block h-full w-full overflow-hidden rounded-xl border border-line bg-bg shadow-sm"
           >
             <img
-              src={`case-studies/${item.slug}.png`}
+              src={`case-studies/${item.slug}${CAPTIONED.has(item.slug) ? '-caption' : ''}.png`}
               alt={item.title}
               loading="lazy"
               className="h-full w-full object-contain p-1.5"
