@@ -25,8 +25,9 @@ const CARDS = items.map((item, i) => {
   return { item, lat, longitude }
 })
 
-const GLOBE_SIZE = 37.5 // % of container size — sphere radius
+const GLOBE_SIZE = 43.125 // % of container size — sphere radius
 const CARD_SIZE = 27.5 // % of container size — card width/height at full (front-most) scale
+const GAP = 2 // % of container size — breathing room shaved off each tile's rendered size
 const CAMERA = GLOBE_SIZE * 1.5
 const TILT_DEG = 24 // tilts the whole projected sphere, like the reference video
 const BACK_FADE = 0.4
@@ -69,7 +70,7 @@ export function ShufflingCollage() {
 
         const sx = 50 + px * cosTilt - py * sinTilt
         const sy = 50 + px * sinTilt + py * cosTilt
-        const size = CARD_SIZE * perspective
+        const size = Math.max(0, CARD_SIZE * perspective - GAP)
 
         gsap.set(el, {
           left: `${sx - size / 2}%`,
@@ -136,7 +137,7 @@ export function ShufflingCollage() {
               src={`case-studies/${item.slug}.png`}
               alt={item.title}
               loading="lazy"
-              className="h-full w-full object-contain p-3"
+              className="h-full w-full object-contain p-1.5"
             />
           </Link>
         </div>
