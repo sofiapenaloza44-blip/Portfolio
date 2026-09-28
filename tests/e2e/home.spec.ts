@@ -9,9 +9,9 @@ test('home page renders the hero and philosophy grid', async ({ page }) => {
 
 test('clicking a featured work tile shows the demo-content notice', async ({ page }) => {
   await page.goto('/')
-  // Tile content periodically cross-fades to a different case study, so a
-  // click landing mid-fade can hit a momentarily-transparent image; force
-  // bypasses Playwright's stability check for that edge case.
+  // The collage tiles animate continuously, so a normal click's stability
+  // check never resolves; force bypasses that (a real cursor click works
+  // fine against a slow-moving target, this is a synthetic-event quirk).
   await page.locator('a[href*="#/work/"]').first().click({ force: true })
   await expect(page).toHaveURL(/#\/work\//)
   await expect(page.getByRole('heading', { name: 'Process', exact: true })).toBeVisible()

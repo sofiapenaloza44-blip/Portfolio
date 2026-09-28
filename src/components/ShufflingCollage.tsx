@@ -1,121 +1,143 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useReducedMotion } from 'motion/react'
 import { gsap } from 'gsap'
 import { allCaseStudies } from '../data/work'
 
 const items = allCaseStudies.slice(0, 12)
-const N = items.length
 
-// Reverse-engineered by stepping through the animo-orbit-globe reference
-// video frame by frame: despite the filename, it isn't a rotating 3D
-// sphere at all. It's a fixed scattered mosaic of same-size cards — the
-// whole layout holds still for several seconds, then every slot
-// cross-fades to a different case study at once, and holds again.
-const SLOTS = [
-  { left: 32, top: 30, width: 34, height: 34 },
-  { left: 4, top: 6, width: 26, height: 27 },
-  { left: 34, top: 2, width: 27, height: 26 },
-  { left: 64, top: 10, width: 28, height: 27 },
-  { left: 2, top: 40, width: 25, height: 26 },
-  { left: 68, top: 44, width: 27, height: 27 },
-  { left: 10, top: 64, width: 26, height: 27 },
-  { left: 40, top: 68, width: 27, height: 27 },
-  { left: 66, top: 66, width: 27, height: 27 },
-]
-// Each slot starts on a different case study so the mosaic doesn't repeat
-// the same item nine times over; as `step` advances every slot cycles
-// through all 12 in turn regardless of its starting offset.
-const SLOT_OFFSETS = SLOTS.map((_, i) => i)
+// Reverse-engineered from the "Orbit Globe" canvas template behind the
+// animo-orbit-globe reference video: each card sits at a fixed
+// (latitude, longitude) on an imaginary sphere, and every card spins
+// together around the sphere's vertical axis over time. Projecting that
+// 3D position back to 2D each frame (below) is what produces the
+// size/opacity/z-index depth cues on its own — there's no separate
+// "3 layers" system, depth falls straight out of the projection math.
+const BAND_LAT_DEG = [-33, -11, 11, 33]
+const BAND_STAGGER = 0.37 // radians — offsets each ring so cards don't line up vertically
+const PER_BAND = Math.ceil(items.length / BAND_LAT_DEG.length)
 
-const HOLD_SECONDS = 8
-const FADE_SECONDS = 0.6
-const STAGGER_SECONDS = 0.05
+const CARDS = items.map((item, i) => {
+  const band = Math.floor(i / PER_BAND)
+  const posInBand = i % PER_BAND
+  const lat = (BAND_LAT_DEG[band] * Math.PI) / 180
+  const longitude = band * BAND_STAGGER + (posInBand * 2 * Math.PI) / PER_BAND
+  return { item, lat, longitude }
+})
+
+const GLOBE_SIZE = 50 // % of container size — sphere radius
+const CARD_SIZE = 27.5 // % of container size — card width/height at full (front-most) scale
+const CAMERA = GLOBE_SIZE * 1.5
+const TILT_DEG = 24 // tilts the whole projected sphere, like the reference video
+const BACK_FADE = 0.4
+const DIRECTION = 1
+const REVOLUTION_SECONDS = 34
+
+const tiltRad = (TILT_DEG * Math.PI) / 180
+const cosTilt = Math.cos(tiltRad)
+const sinTilt = Math.sin(tiltRad)
 
 export function ShufflingCollage() {
   const reduce = useReducedMotion()
-  const [step, setStep] = useState(0)
-  const wrapperRefs = useRef<(HTMLDivElement | null)[]>([])
-  const imgRefs = useRef<(HTMLImageElement | null)[]>([])
+  const tileRefs = useRef<(HTMLDivElement | null)[]>([])
   const hoveredRef = useRef<number | null>(null)
+  const currentProgressRef = useRef(0)
+  const placeRef = useRef<(progress: number) => void>(() => {})
 
   useEffect(() => {
-    if (reduce) return
+    const place = (progress: number) => {
+      currentProgressRef.current = progress
+      CARDS.forEach(({ lat, longitude }, i) => {
+        // A hovered tile is fully owned by the hover handlers below (frozen
+        // position, scaled up) — skip it entirely so this per-frame update
+        // doesn't fight that state.
+        if (hoveredRef.current === i) return
 
-    let cancelled = false
-    let timeoutId: ReturnType<typeof setTimeout>
+        const el = tileRefs.current[i]
+        if (!el) return
 
-    const advance = () => {
-      timeoutId = setTimeout(() => {
-        if (cancelled) return
-        const fadeOutTargets = imgRefs.current.filter((_, i) => hoveredRef.current !== i) as HTMLImageElement[]
-        gsap.to(fadeOutTargets, {
-          opacity: 0,
-          duration: FADE_SECONDS / 2,
-          stagger: STAGGER_SECONDS,
-          onComplete: () => {
-            if (cancelled) return
-            setStep((s) => (s + 1) % N)
-            requestAnimationFrame(() => {
-              const fadeInTargets = imgRefs.current.filter((_, i) => hoveredRef.current !== i) as HTMLImageElement[]
-              gsap.to(fadeInTargets, { opacity: 1, duration: FADE_SECONDS / 2, stagger: STAGGER_SECONDS })
-            })
-            advance()
-          },
+        const longitudeNow = longitude + DIRECTION * 2 * Math.PI * progress
+        const ringRadius = Math.cos(lat)
+        const height3d = Math.sin(lat)
+        const x3d = Math.sin(longitudeNow) * ringRadius
+        const facing = Math.cos(longitudeNow) * ringRadius // -1 (back) .. 1 (front)
+
+        const depth = CAMERA + GLOBE_SIZE * (1 - facing)
+        const perspective = CAMERA / depth
+        const px = GLOBE_SIZE * x3d * perspective
+        const py = -GLOBE_SIZE * height3d * perspective
+
+        const sx = 50 + px * cosTilt - py * sinTilt
+        const sy = 50 + px * sinTilt + py * cosTilt
+        const size = CARD_SIZE * perspective
+
+        gsap.set(el, {
+          left: `${sx - size / 2}%`,
+          top: `${sy - size / 2}%`,
+          width: `${size}%`,
+          height: `${size}%`,
+          opacity: 1 - BACK_FADE * ((1 - facing) / 2),
+          zIndex: Math.round((facing + 1) * 45),
+          scale: 1,
         })
-      }, HOLD_SECONDS * 1000)
+      })
     }
 
-    advance()
+    placeRef.current = place
+
+    // Static pose, no ongoing motion, for reduced-motion viewers. Hover
+    // handlers below call placeRef.current directly to still react, since
+    // there's no running loop to pick up the change otherwise.
+    if (reduce) {
+      place(0)
+      return
+    }
+
+    const proxy = { progress: 0 }
+    const tween = gsap.to(proxy, {
+      progress: 1,
+      duration: REVOLUTION_SECONDS,
+      ease: 'none',
+      repeat: -1,
+      onUpdate: () => place(proxy.progress),
+    })
+
     return () => {
-      cancelled = true
-      clearTimeout(timeoutId)
+      tween.kill()
     }
   }, [reduce])
 
   return (
     <div className="relative mx-auto aspect-square w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
-      {SLOTS.map((slot, i) => {
-        const item = items[(step + SLOT_OFFSETS[i]) % N]
-        return (
-          <div
-            key={i}
-            ref={(el) => {
-              wrapperRefs.current[i] = el
-            }}
-            className="absolute"
-            style={{
-              left: `${slot.left}%`,
-              top: `${slot.top}%`,
-              width: `${slot.width}%`,
-              height: `${slot.height}%`,
-              zIndex: 10 + i,
-            }}
-            onMouseEnter={() => {
-              hoveredRef.current = i
-              const el = wrapperRefs.current[i]
-              if (el) gsap.to(el, { scale: 1.1, zIndex: 100, duration: 0.25, ease: 'power2.out' })
-            }}
-            onMouseLeave={() => {
-              hoveredRef.current = null
-              const el = wrapperRefs.current[i]
-              if (el) gsap.to(el, { scale: 1, zIndex: 10 + i, duration: 0.25, ease: 'power2.out' })
-            }}
-          >
-            <Link to={`/work/${item.slug}`} className="block h-full w-full">
-              <img
-                ref={(el) => {
-                  imgRefs.current[i] = el
-                }}
-                src={`case-studies/${item.slug}.png`}
-                alt={item.title}
-                loading="lazy"
-                className="h-full w-full object-contain"
-              />
-            </Link>
-          </div>
-        )
-      })}
+      {CARDS.map(({ item }, i) => (
+        <div
+          key={item.slug}
+          ref={(el) => {
+            tileRefs.current[i] = el
+          }}
+          className="absolute"
+          onMouseEnter={() => {
+            hoveredRef.current = i
+            const el = tileRefs.current[i]
+            if (el) {
+              gsap.to(el, { scale: 1.1, opacity: 1, zIndex: 1000, duration: 0.25, ease: 'power2.out' })
+            }
+          }}
+          onMouseLeave={() => {
+            hoveredRef.current = null
+            placeRef.current(currentProgressRef.current)
+          }}
+        >
+          <Link to={`/work/${item.slug}`} className="block h-full w-full">
+            <img
+              src={`case-studies/${item.slug}.png`}
+              alt={item.title}
+              loading="lazy"
+              className="h-full w-full object-contain"
+            />
+          </Link>
+        </div>
+      ))}
     </div>
   )
 }
