@@ -130,7 +130,7 @@ export function ShufflingCollage() {
         >
           <Link
             to={`/work/${item.slug}`}
-            className="block h-full w-full overflow-hidden rounded-xl border-[5px] border-line bg-bg shadow-sm"
+            className="block h-full w-full overflow-hidden rounded-xl border border-line bg-bg shadow-sm"
           >
             <img
               src={`case-studies/${item.slug}.png`}
