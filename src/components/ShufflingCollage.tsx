@@ -2,37 +2,56 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useReducedMotion } from 'motion/react'
 import { gsap } from 'gsap'
-import { allCaseStudies } from '../data/work'
+import { findCaseStudy, type CaseStudy } from '../data/work'
 
-const items = allCaseStudies.slice(0, 12)
-
-// Reverse-engineered from the "Orbit Globe" canvas template behind the
-// animo-orbit-globe reference video: each card sits at a fixed
-// (latitude, longitude) on an imaginary sphere, and every card spins
-// together around the sphere's vertical axis over time. Projecting that
-// 3D position back to 2D each frame (below) is what produces the
-// size/opacity/z-index depth cues on its own — there's no separate
-// "3 layers" system, depth falls straight out of the projection math.
-const BAND_LAT_DEG = [-33, -11, 11, 33]
-const BAND_STAGGER = 0.37 // radians — offsets each ring so cards don't line up vertically
-const PER_BAND = Math.ceil(items.length / BAND_LAT_DEG.length)
-
-const CARDS = items.map((item, i) => {
-  const band = Math.floor(i / PER_BAND)
-  const posInBand = i % PER_BAND
-  const lat = (BAND_LAT_DEG[band] * Math.PI) / 180
-  const longitude = band * BAND_STAGGER + (posInBand * 2 * Math.PI) / PER_BAND
-  return { item, lat, longitude }
-})
-
-const GLOBE_SIZE = 43.125 // % of container size — sphere radius
-const CARD_SIZE = 27.5 // % of container size — card width/height at full (front-most) scale
-const GAP = 2 // % of container size — breathing room shaved off each tile's rendered size
+// Replicates the animo "Orbit Globe" reference video. Settings were fitted
+// against the video frame by frame (card silhouettes across 12 frames, a
+// tracked card's path, and template-matching each icon to its slot), so
+// ring counts, spacing, speed and which icon sits where all match it.
+// Units are % of the container's side, like the template's % of the frame.
+const GLOBE_SIZE = 48 // sphere radius
+const CARD_SIZE = 30 // card width/height when directly facing the viewer
+const GAP = 4.5 // spacing between cards along a ring and between rings
+const TILT_DEG = 27 // tilts the whole projected sphere in the screen plane
+const BACK_FADE = 0.55 // opacity lost at the very back of the sphere
+const REVOLUTION_SECONDS = 30
 const CAMERA = GLOBE_SIZE * 1.5
-const TILT_DEG = 24 // tilts the whole projected sphere, like the reference video
-const BACK_FADE = 0.4
-const DIRECTION = 1
-const REVOLUTION_SECONDS = 34
+
+// Image order the video assigns to slots; with 23 positions and 12 images,
+// each case study appears about twice around the globe.
+const SLOT_ORDER = [
+  'bbva-appointment-scheduling',
+  'customer-obsession',
+  'design-system-implementation',
+  'frisa-sales-system-modernization',
+  'litera-edtech-foundations',
+  'teradata-one-identity',
+  'santander-mobile-app-features',
+  'stori-black-card-beta',
+  'skooli-classroom-experience',
+  'sony-internal-communications',
+  'stori-compliant-application',
+  'teradata-ai-assistant-trust',
+]
+const images = SLOT_ORDER.map((slug) => findCaseStudy(slug)).filter((c): c is CaseStudy => !!c)
+
+// Latitude rings, spaced one card-plus-gap apart, each filled with as many
+// cards as fit its circumference and staggered so columns don't line up.
+const RING_STEP = (CARD_SIZE + GAP) / GLOBE_SIZE
+const HALF_RINGS = Math.max(1, Math.floor(1.15 / RING_STEP))
+const RING_COUNT = HALF_RINGS * 2 + 1
+const SLOTS_PER_RING = Math.max(1, Math.round(images.length / RING_COUNT))
+
+const CARDS = Array.from({ length: RING_COUNT }).flatMap((_, ring) => {
+  const lat = (ring - HALF_RINGS) * RING_STEP
+  const perRing = Math.max(3, Math.round((2 * Math.PI * GLOBE_SIZE * Math.cos(lat)) / (CARD_SIZE + GAP)))
+  return Array.from({ length: perRing }, (_, j) => ({
+    key: `${ring}-${j}`,
+    item: images[(j + ring * SLOTS_PER_RING) % images.length],
+    lat,
+    longitude: ring * 0.37 + (2 * Math.PI * j) / perRing,
+  }))
+})
 
 const tiltRad = (TILT_DEG * Math.PI) / 180
 const cosTilt = Math.cos(tiltRad)
@@ -50,27 +69,25 @@ export function ShufflingCollage() {
       currentProgressRef.current = progress
       CARDS.forEach(({ lat, longitude }, i) => {
         // A hovered tile is fully owned by the hover handlers below (frozen
-        // position, scaled up) — skip it entirely so this per-frame update
-        // doesn't fight that state.
+        // position, scaled up) — skip it so this per-frame update doesn't
+        // fight that state.
         if (hoveredRef.current === i) return
 
         const el = tileRefs.current[i]
         if (!el) return
 
-        const longitudeNow = longitude + DIRECTION * 2 * Math.PI * progress
+        const longitudeNow = longitude + 2 * Math.PI * progress
         const ringRadius = Math.cos(lat)
-        const height3d = Math.sin(lat)
         const x3d = Math.sin(longitudeNow) * ringRadius
         const facing = Math.cos(longitudeNow) * ringRadius // -1 (back) .. 1 (front)
 
-        const depth = CAMERA + GLOBE_SIZE * (1 - facing)
-        const perspective = CAMERA / depth
+        const perspective = CAMERA / (CAMERA + GLOBE_SIZE * (1 - facing))
         const px = GLOBE_SIZE * x3d * perspective
-        const py = -GLOBE_SIZE * height3d * perspective
+        const py = -GLOBE_SIZE * Math.sin(lat) * perspective
 
         const sx = 50 + px * cosTilt - py * sinTilt
         const sy = 50 + px * sinTilt + py * cosTilt
-        const size = Math.max(0, CARD_SIZE * perspective - GAP)
+        const size = CARD_SIZE * perspective
 
         gsap.set(el, {
           left: `${sx - size / 2}%`,
@@ -110,9 +127,9 @@ export function ShufflingCollage() {
 
   return (
     <div className="relative mx-auto aspect-square w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
-      {CARDS.map(({ item }, i) => (
+      {CARDS.map(({ key, item }, i) => (
         <div
-          key={item.slug}
+          key={key}
           ref={(el) => {
             tileRefs.current[i] = el
           }}
