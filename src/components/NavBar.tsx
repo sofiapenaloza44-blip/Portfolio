@@ -9,7 +9,6 @@ const links = [
   { label: 'Career journey', to: '/career-journey' },
   { label: 'CV', href: site.cvUrl },
   { label: 'LinkedIn', href: site.linkedinUrl },
-  { label: 'Contact', href: `mailto:${site.email}` },
 ]
 
 const linkStyle =
