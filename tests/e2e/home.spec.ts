@@ -7,9 +7,12 @@ test('home page renders the hero and philosophy grid', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'How do I lead my teams?' })).toBeVisible()
 })
 
-test('navigating into a case study shows the demo-content notice', async ({ page }) => {
+test('clicking a featured work tile shows the demo-content notice', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('link', { name: /read case study/i }).first().click()
+  // The collage tiles animate continuously, so a normal click's stability
+  // check never resolves; force bypasses that (a real cursor click works
+  // fine against a slow-moving target, this is a synthetic-event quirk).
+  await page.locator('a[href*="#/work/"]').first().click({ force: true })
   await expect(page).toHaveURL(/#\/work\//)
   await expect(page.getByRole('heading', { name: 'Process', exact: true })).toBeVisible()
   await expect(page.getByText(/demo content/i)).toBeVisible()

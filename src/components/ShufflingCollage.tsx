@@ -115,7 +115,7 @@ export function ShufflingCollage() {
   }, [reduce])
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-md sm:max-w-lg">
+    <div className="relative mx-auto aspect-square w-full max-w-xl sm:max-w-2xl lg:max-w-3xl">
       {items.map((item, i) => (
         <div
           key={item.slug}
