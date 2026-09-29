@@ -29,7 +29,7 @@ export function CareerJourney() {
             <motion.div
               whileHover={reduce ? undefined : { y: -4 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="flex flex-col gap-3 rounded-xl border border-line bg-surface/40 p-8 shadow-sm md:px-10"
+              className="flex flex-col gap-3 rounded-xl border border-gold bg-surface/15 p-8 shadow-sm md:px-10"
             >
               <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ink-soft">{stop.period}</p>
               <h3>
