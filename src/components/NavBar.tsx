@@ -4,7 +4,7 @@ import { List, X } from '@phosphor-icons/react'
 import { site } from '../data/site'
 
 const links = [
-  { label: 'Portfolio', to: '/' },
+  { label: 'Main', to: '/' },
   { label: 'Featured work', to: '/featured-work' },
   { label: 'Career journey', to: '/career-journey' },
   { label: 'CV', href: site.cvUrl },
