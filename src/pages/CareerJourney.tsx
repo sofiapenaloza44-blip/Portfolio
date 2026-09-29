@@ -27,19 +27,19 @@ export function CareerJourney() {
           >
             <span className="absolute -left-[1.65rem] top-6 h-2.5 w-2.5 rounded-full bg-gold" />
             <motion.div
-              whileHover={reduce ? undefined : { scale: 1.1 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="rounded-2xl border border-line bg-surface p-5 shadow-sm"
+              whileHover={reduce ? undefined : { y: -4 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="flex flex-col gap-3 rounded-xl border border-line bg-surface/40 p-8 shadow-sm md:px-10"
             >
-              <p className="text-sm text-ink-soft">{stop.period}</p>
-              <h2 className="mt-1 text-lg font-semibold tracking-tight">
+              <p className="text-[0.7rem] uppercase tracking-[0.18em] text-ink-soft">{stop.period}</p>
+              <h3>
                 {stop.role} · {stop.company}
-              </h2>
-              <p className="mt-2 text-ink-soft">{stop.summary}</p>
+              </h3>
+              <p className="max-w-xl text-ink-soft">{stop.summary}</p>
               {stop.caseStudySlug && (
                 <Link
                   to={`/work/${stop.caseStudySlug}`}
-                  className="mt-2 inline-block text-sm font-medium text-ink underline decoration-gold decoration-2 underline-offset-4"
+                  className="mt-2 inline-flex w-fit items-center rounded-full bg-gold/75 px-6 py-3 text-sm font-semibold text-ink transition-[filter] hover:brightness-95"
                 >
                   Read the case study
                 </Link>
