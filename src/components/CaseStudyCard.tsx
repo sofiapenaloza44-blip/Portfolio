@@ -26,7 +26,7 @@ export function CaseStudyCard({ study }: { study: CaseStudy }) {
         <p className="max-w-xl text-ink-soft">{study.summary}</p>
         <Link
           to={`/work/${study.slug}`}
-          className="mt-2 inline-flex w-fit items-center rounded-full bg-gold px-6 py-3 text-sm font-semibold text-ink transition-[filter] hover:brightness-95"
+          className="mt-2 inline-flex w-fit items-center rounded-full bg-gold/75 px-6 py-3 text-sm font-semibold text-ink transition-[filter] hover:brightness-95"
         >
           View Case Study
         </Link>
